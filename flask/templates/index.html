@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Vélib à proximité</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Vélib à Paris 🚴‍♂️</h1>
+    </header>
+
+    <div class="container">
+        <div class="sidebar">
+            <form method="POST">
+                <input type="text" name="adresse" placeholder="Entrez une adresse">
+                <input type="number" name="rayon" placeholder="Distance en mètres" value="500">
+                <button type="submit">Rechercher</button>
+            </form>
+
+            <h3>Statistiques :</h3>
+            <ul>
+                <li>Stations visibles : {{ stats.stations }}</li>
+                <li>Vélos électriques : {{ stats.ebikes }}</li>
+                <li>Vélos mécaniques : {{ stats.mechanical }}</li>
+            </ul>
+        </div>
+
+        <div class="map">
+            {{ map_html|safe }}
+        </div>
+    </div>
+</body>
+</html>
