@@ -1,2 +1,6 @@
 env/
 .env
+neo4j/neo4j_data/
+neo4j/neo4j_import/
+neo4j/neo4j_logs/
+neo4j/neo4j_plugins/

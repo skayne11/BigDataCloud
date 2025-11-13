@@ -5,10 +5,10 @@ import os, dotenv
 dotenv.load_dotenv()
 
 # Connexion Mongo
-uri = os.getenv("URI_MONGODB")
+uri = os.getenv("URI_CLOUD")
 client = MongoClient(uri)
-db = client["testdb"]
-collection = db["velib"]
+db = client["velib"]
+collection = db["Paris"]
 
 # Création d'un index unique sur stationcode (avant toute insertion)
 collection.create_index("stationcode", unique=True)
