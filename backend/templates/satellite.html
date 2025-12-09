@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+.detail-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.detail-container h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+.detail-card {
+    background: #14141a;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #24242c;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    margin-bottom: 20px;
+}
+
+.detail-card h2 {
+    color: #66aaff;
+    margin-bottom: 10px;
+}
+
+.detail-card p {
+    margin: 6px 0;
+}
+
+.detail-card ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.detail-card ul li {
+    margin: 4px 0;
+}
+
+.button {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 8px 14px;
+    background: #1c1c25;
+    color: #e5e5e5;
+    border-radius: 6px;
+    border: 1px solid #2a2a35;
+    text-decoration: none;
+    transition: 0.2s;
+}
+.button:hover {
+    background: #2a2a35;
+}
+
+#satMap {
+    width: 100%;
+    height: 400px;
+    margin-top: 20px;
+    border-radius: 8px;
+    border: 1px solid #24242c;
+}
+</style>
+
+<div class="detail-container">
+    <h1>Détails du satellite : {{ sat }}</h1>
+
+    <div class="detail-card">
+        <h2>Informations principales</h2>
+        <ul>
+            <li><strong>Nom :</strong> {{ sat }}</li>
+            <li><strong>Altitude :</strong> {{ data.altitude/1000 if data and data.altitude else "N/A" }} km</li>
+            <li><strong>Orbite :</strong> {{ data.orbit_class if data else "N/A" }}</li>
+            <li><strong>Catalog Number :</strong> {{ data.catalog_number if data else "N/A" }}</li>
+        </ul>
+
+        <h2>Données TLE</h2>
+        <ul>
+            <li>Ligne 1 : {{ data.line1 if data else "Non chargé" }}</li>
+            <li>Ligne 2 : {{ data.line2 if data else "Non chargé" }}</li>
+        </ul>
+
+        <h2>Position</h2>
+        <ul>
+            <li id="lat">Latitude : …</li>
+            <li id="lon">Longitude : …</li>
+        </ul>
+
+        <a href="/" class="button">Retour</a>
+    </div>
+
+    <div id="satMap"></div>
+
+    <!-- CesiumJS -->
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.113/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.113/Build/Cesium/Cesium.js"></script>
+
+    <script>
+        // Initialisation Cesium
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NDk4OGI5Mi1hZTg5LTQ0MDgtOTRkMC1jOGUzNzMzNjAzMGEiLCJpZCI6MzY3ODAwLCJpYXQiOjE3NjUyMzIxNjF9.Hn7JE8loFBLY-0gzSfC9LR2I70m-baD1af3duDG-e9w';
+        const viewer = new Cesium.Viewer('satMap', { timeline: false, animation: false });
+
+        // Récupération des coordonnées via l'API
+        fetch(`/api/satellite/{{ sat }}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.latitude !== undefined && data.longitude !== undefined && data.altitude !== undefined){
+                // Mise à jour du texte
+                document.getElementById('lat').textContent = `Latitude : ${data.latitude.toFixed(2)}`;
+                document.getElementById('lon').textContent = `Longitude : ${data.longitude.toFixed(2)}`;
+
+                // Ajout du satellite sur le globe
+                viewer.entities.add({
+                    name: data.name,
+                    position: Cesium.Cartesian3.fromDegrees(data.longitude, data.latitude, data.altitude),
+                    point: { pixelSize: 10, color: Cesium.Color.RED }
+                });
+
+                viewer.zoomTo(viewer.entities);
+            } else {
+                document.getElementById('lat').textContent = "Latitude : N/A";
+                document.getElementById('lon').textContent = "Longitude : N/A";
+            }
+        })
+        .catch(err => console.error("Erreur fetch satellite:", err));
+    </script>
+</div>
+{% endblock %}

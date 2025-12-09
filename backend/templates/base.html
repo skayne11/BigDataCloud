@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title if title else "SpaceTrack Explorer" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="left">
+            <a href="/">SpaceTrack Explorer</a>
+        </div>
+        <div class="right">
+            <a href="/">Satellites</a>
+            <a href="/graph">Graph</a>
+            <a href="/globe">Globe</a>
+            <a href="/search" class="hover:underline">Recherche</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>

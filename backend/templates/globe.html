@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+    }
+
+    #sidebar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 250px;
+        height: 100%;
+        background: rgba(20, 20, 20, 0.92);
+        color: white;
+        padding: 20px;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #cesiumContainer {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    }
+
+    ul { padding-left: 20px; }
+
+    .dot {
+        height: 12px;
+        width: 12px;
+        display: inline-block;
+        border-radius: 50%;
+        margin-right: 6px;
+    }
+
+    .leo { background: #1E90FF; }
+    .meo { background: #00FF7F; }
+    .geo { background: #FFD700; }
+    .heo { background: #FF4500; }
+</style>
+
+
+<div id="sidebar">
+    <h2>Satellite Stats</h2>
+
+    <h3>Légende</h3>
+    <ul>
+        <li><span class="dot leo"></span> LEO (Low Earth Orbit)</li>
+        <li><span class="dot meo"></span> MEO (Medium Earth Orbit)</li>
+        <li><span class="dot geo"></span> GEO (Geostationary)</li>
+        <li><span class="dot heo"></span> HEO (Highly Elliptical)</li>
+    </ul>
+
+    <h3>Statistiques</h3>
+    <div id="stats">
+        <p>Total satellites : <span id="sat_count">…</span></p>
+        <p>LEO : <span id="leo_count">…</span></p>
+        <p>MEO : <span id="meo_count">…</span></p>
+        <p>GEO : <span id="geo_count">…</span></p>
+        <p>HEO : <span id="heo_count">…</span></p>
+    </div>
+</div>
+
+<div id="cesiumContainer"></div>
+
+<div id="satPopup" class="popup" style="display: none;">
+    <div id="popupHeader" class="popup-header">
+        <span id="popupTitle"></span>
+        <button id="popupClose">✖</button>
+    </div>
+    <div id="popupContent"></div>
+</div>
+
+
+<!-- CesiumJS -->
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.113/Build/Cesium/Cesium.js"></script>
+<link href="https://cesium.com/downloads/cesiumjs/releases/1.113/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+
+
+<script>
+// 🎫 Ton Jeton Cesium (OK)
+Cesium.Ion.defaultAccessToken =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NDk4OGI5Mi1hZTg5LTQ0MDgtOTRkMC1jOGUzNzMzNjAzMGEiLCJpZCI6MzY3ODAwLCJpYXQiOjE3NjUyMzIxNjF9.Hn7JE8loFBLY-0gzSfC9LR2I70m-baD1af3duDG-e9w';
+
+// 🎥 Création du globe
+const viewer = new Cesium.Viewer("cesiumContainer", {
+    timeline: false,
+    animation: false,
+});
+
+
+// 📌 Met à jour les stats dans la sidebar
+function updateStats(data) {
+    document.getElementById("sat_count").textContent = data.length;
+    document.getElementById("leo_count").textContent = data.filter(s => s.orbit_class === "LEO").length;
+    document.getElementById("meo_count").textContent = data.filter(s => s.orbit_class === "MEO").length;
+    document.getElementById("geo_count").textContent = data.filter(s => s.orbit_class === "GEO").length;
+    document.getElementById("heo_count").textContent = data.filter(s => s.orbit_class === "HEO").length;
+}
+
+
+// 🛰️ Récupération satellites depuis ton API Flask
+fetch("/api/satellites")
+    .then(res => res.json())
+    .then(data => {
+
+        // ➤ Statistiques
+        updateStats(data);
+
+        // ➤ Placement des satellites
+        data.forEach(sat => {
+
+            let color;
+            switch(sat.orbit_class) {
+                case "LEO": color = Cesium.Color.BLUE; break;
+                case "MEO": color = Cesium.Color.GREEN; break;
+                case "GEO": color = Cesium.Color.ORANGE; break;
+                case "HEO": color = Cesium.Color.RED; break;
+                default: color = Cesium.Color.GRAY;
+            }
+
+            viewer.entities.add({
+                name: sat.name,
+                position: Cesium.Cartesian3.fromDegrees(
+                    sat.longitude,
+                    sat.latitude,
+                    sat.altitude
+                ),
+                point: {
+                    pixelSize: 5,
+                    color: color
+                },
+                description: `
+                    <h2>${sat.name}</h2>
+                    <table class="cesium-info-table">
+                        <tr><td><b>Classe orbitale :</b></td><td>${sat.orbit_class}</td></tr>
+                        <tr><td><b>Altitude :</b></td><td>${sat.altitude.toFixed(0) / 1000} km</td></tr>
+                        <tr><td><b>Latitude :</b></td><td>${sat.latitude.toFixed(2)}°</td></tr>
+                        <tr><td><b>Longitude :</b></td><td>${sat.longitude.toFixed(2)}°</td></tr>
+                        <tr><td><b>Inclinaison :</b></td><td>${sat.inclination ?? "N/A"}°</td></tr>
+                        <tr><td><b>Période :</b></td><td>${sat.period ?? "N/A"} min</td></tr>
+                    </table>
+                `
+            });
+        });
+
+        viewer.zoomTo(viewer.entities);
+    });
+</script>
+
+{% endblock %}

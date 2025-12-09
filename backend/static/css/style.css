@@ -1,0 +1,213 @@
+/* ----- GLOBAL ----- */
+body {
+    margin: 0;
+    font-family: 'Inter', Arial, sans-serif;
+    background-color: #0e0e12;
+    color: #e5e5e5;
+}
+
+a {
+    color: #66aaff;
+    text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+/* ----- NAVBAR ----- */
+.navbar {
+    background: #14141a;
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #24242c;
+    z-index: 9999;
+}
+
+.navbar a {
+    font-size: 1.1rem;
+    margin-right: 20px;
+    color: #e5e5e5;
+}
+.navbar a:hover {
+    color: #66aaff;
+}
+
+/* ----- CONTAINER ----- */
+.container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* ----- TABLE ----- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #14141a;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 14px;
+    text-align: left;
+}
+
+th {
+    background: #1c1c22;
+    color: #a0a0a8;
+    font-weight: 500;
+}
+
+tr:nth-child(even) {
+    background: #1a1a20;
+}
+
+tr:hover {
+    background: #22222a;
+}
+
+/* ----- CARD ----- */
+.card {
+    background: #14141a;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #24242c;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* ----- GRAPH AREA ----- */
+#viz {
+    width: 100%;
+    height: 600px;
+    background: #101015;
+    border-radius: 10px;
+    border: 1px solid #24242c;
+}
+
+/* ----- TITLES ----- */
+h1, h2 {
+    margin-top: 0;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+/* ----- BUTTONS ----- */
+.button {
+    padding: 10px 18px;
+    background: #1c1c25;
+    border-radius: 6px;
+    border: 1px solid #2a2a35;
+    color: #e5e5e5;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.button:hover {
+    background: #2a2a35;
+}
+
+/* --------------------------------------------- */
+/*          SIDEBAR GLOBE CESIUM JS              */
+/* --------------------------------------------- */
+
+#sidebar {
+    position: absolute;
+    left: 20px;
+    top: 80px;
+    width: 260px;
+    background: #14141a;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #24242c;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    z-index: 100;
+}
+
+#sidebar h2 {
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+}
+
+#sidebar h3 {
+    margin-top: 20px;
+    font-size: 1.1rem;
+    color: #bbbbbb;
+}
+
+#sidebar ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#sidebar li {
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Points colorés */
+.dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.leo { background: #4da6ff; }     /* Bleu */
+.meo { background: #4dff4d; }     /* Vert */
+.geo { background: #ffb84d; }     /* Orange */
+.heo { background: #ff4d4d; }     /* Rouge */
+
+/* Stats */
+#stats p {
+    margin: 6px 0;
+    font-size: 0.95rem;
+}
+
+#cesiumContainer {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    margin-top: 50px;
+    padding: 0;
+}
+
+.cesium-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.cesium-info-table td {
+    padding: 6px 4px;
+    border-bottom: 1px solid #333;
+    color: #ddd;
+}
+
+.cesium-info-table tr:last-child td {
+    border-bottom: none;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.chart-card {
+    background: #14141a;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #24242c;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+}
+
+.chart-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #e5e5e5;
+}
+

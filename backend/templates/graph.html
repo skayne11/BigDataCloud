@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Statistiques Satellites</h1>
+
+<div class="charts-grid">
+
+    <div class="chart-card">
+        <h3>Répartition par classe orbitale</h3>
+        <canvas id="orbitChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <h3>Distribution des altitudes</h3>
+        <canvas id="altitudeChart"></canvas>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+fetch('/api/satellites')
+    .then(res => res.json())
+    .then(data => {
+
+        /* NORMALISATION DES DONNÉES */
+        data.forEach(sat => {
+            // Nettoyage orbit_class
+            if (!sat.orbit_class || sat.orbit_class.trim() === "") {
+                sat.orbit_class = "UNKNOWN";
+            } else {
+                sat.orbit_class = sat.orbit_class.toUpperCase().trim();
+            }
+
+            // Nettoyage type
+            if (!sat.type || sat.type.trim() === "" || sat.type === "Inconnu") {
+                sat.type = "UNKNOWN";
+            }
+        });
+
+        /* === 1. Répartition ORBIT_CLASS === */
+        const orbitCounts = { LEO: 0, MEO: 0, GEO: 0, HEO: 0, UNKNOWN: 0 };
+
+        data.forEach(s => {
+            if (orbitCounts[s.orbit_class] !== undefined)
+                orbitCounts[s.orbit_class]++;
+            else
+                orbitCounts.UNKNOWN++;
+        });
+
+        new Chart(document.getElementById('orbitChart'), {
+            type: 'pie',
+            data: {
+                labels: Object.keys(orbitCounts),
+                datasets: [{
+                    data: Object.values(orbitCounts),
+                    backgroundColor: ['#66aaff', '#66ff99', '#ffcc66', '#ff6666', '#999']
+                }]
+            }
+        });
+
+
+        /* === 2. Distribution ALTITUDE === */
+        const altitudeBuckets = {
+            "0-500 km":0,
+            "500-1000 km":0,
+            "1000-2000 km":0,
+            "2000-5000 km":0,
+            "5000+ km":0
+        };
+
+        data.forEach(s => {
+            const alt = parseFloat(s.altitude) / 1000;
+            if (!alt || alt <= 0) return;
+            if (alt <= 500) altitudeBuckets["0-500 km"]++;
+            else if (alt <= 1000) altitudeBuckets["500-1000 km"]++;
+            else if (alt <= 2000) altitudeBuckets["1000-2000 km"]++;
+            else if (alt <= 5000) altitudeBuckets["2000-5000 km"]++;
+            else altitudeBuckets["5000+ km"]++;
+        });
+
+        new Chart(document.getElementById('altitudeChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(altitudeBuckets),
+                datasets: [{
+                    label: 'Satellites',
+                    data: Object.values(altitudeBuckets),
+                    backgroundColor: '#66aaff'
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true } } }
+        });
+
+    });
+
+</script>
+
+{% endblock %}

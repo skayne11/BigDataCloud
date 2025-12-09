@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+/* ----- SEARCH PAGE ----- */
+.search-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.search-container h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+.search-form input[type="text"], 
+.search-form select {
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid #444;
+    width: 200px;
+    background: #14141a;
+    color: #e5e5e5;
+    margin-right: 10px;
+}
+
+.search-form button {
+    padding: 8px 12px;
+    background: #1c1c25;
+    color: #e5e5e5;
+    border-radius: 5px;
+    border: 1px solid #2a2a35;
+    cursor: pointer;
+}
+
+.search-form button:hover {
+    background: #2a2a35;
+}
+
+.satellite-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.satellite-card {
+    background: #14141a;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #24242c;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: 0.2s;
+}
+
+.satellite-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.satellite-card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    color: #66aaff;
+}
+
+.satellite-card p {
+    margin: 4px 0;
+}
+
+.satellite-card a {
+    display: inline-block;
+    margin-top: 8px;
+    color: #66aaff;
+    text-decoration: none;
+}
+
+.satellite-card a:hover {
+    text-decoration: underline;
+}
+</style>
+
+<div class="search-container">
+    <h1>Recherche de satellites</h1>
+
+    <form id="searchForm" class="search-form">
+        <input type="text" id="searchInput" placeholder="Nom du satellite...">
+        
+        <select id="orbitFilter">
+            <option value="">Toutes les orbites</option>
+            <option value="LEO">LEO</option>
+            <option value="MEO">MEO</option>
+            <option value="GEO">GEO</option>
+            <option value="HEO">HEO</option>
+        </select>
+
+        <button type="submit">Rechercher</button>
+    </form>
+
+    <div id="satelliteGrid" class="satellite-grid"></div>
+    <p id="noResults" style="display:none; margin-top:10px;">Aucun satellite trouvé</p>
+</div>
+
+<script>
+const form = document.getElementById('searchForm');
+const input = document.getElementById('searchInput');
+const orbitFilter = document.getElementById('orbitFilter');
+const typeFilter = document.getElementById('typeFilter');
+const grid = document.getElementById('satelliteGrid');
+const noResults = document.getElementById('noResults');
+
+let satellitesData = [];
+
+// Récupérer tous les satellites depuis l'API au chargement
+fetch('/api/satellites')
+.then(res => res.json())
+.then(data => {
+    satellitesData = data;
+    renderSatellites(data); // Affiche tous les satellites initialement
+});
+
+// Fonction pour afficher une liste de satellites
+function renderSatellites(list) {
+    grid.innerHTML = '';
+    if (list.length === 0) {
+        noResults.style.display = 'block';
+        return;
+    } else {
+        noResults.style.display = 'none';
+    }
+
+    list.forEach(sat => {
+        const card = document.createElement('div');
+        card.className = 'satellite-card';
+        card.innerHTML = `
+            <h2>${sat.name}</h2>
+            <p>Altitude : ${sat.altitude ? (sat.altitude/1000).toFixed(2) : "N/A"} km</p>
+            <p>Orbite : ${sat.orbit_class || "N/A"}</p>
+            <p>Latitude : ${sat.latitude ? sat.latitude.toFixed(2) : "N/A"}</p>
+            <p>Longitude : ${sat.longitude ? sat.longitude.toFixed(2) : "N/A"}</p>
+            <a href="/satellite/${encodeURIComponent(sat.name)}">Voir détails</a>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// Filtrer les satellites au submit
+form.addEventListener('submit', e => {
+    e.preventDefault();
+    const query = input.value.trim().toLowerCase();
+    const orbit = orbitFilter.value;
+
+    const filtered = satellitesData.filter(sat => {
+        const matchesName = sat.name.toLowerCase().includes(query);
+        const matchesOrbit = orbit ? sat.orbit_class === orbit : true;
+        return matchesName && matchesOrbit;
+    });
+
+    renderSatellites(filtered);
+});
+</script>
+{% endblock %}
