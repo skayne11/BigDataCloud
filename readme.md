@@ -97,7 +97,7 @@ http://127.0.0.1:5000
 
 - Les graphiques reflètent l’état actuel des satellites depuis l’API
 
-##Auteur
+## Auteur
 
 Skayne – GitHub : https://github.com/skayne11/
 
